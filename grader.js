@@ -26,6 +26,8 @@ var program = require('commander');
 var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
+var URL_DEFAULT = "";
+var TEMP_FILE = "remoteFile.html"
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -61,21 +63,31 @@ var clone = function(fn) {
     return fn.bind({});
 };
 
-var write2File(result, response){
-    if ()dwresult
-}
+var write2File = function (result, response){
+    if (result instanceof Error) {
+        console.error("Get url failed.");
+    }
+    else {
+        fs.writeFileSync(TEMP_FILE, result);
+    }
+    }
 var getFileFromUrl = function(url) {
     rest = require("restler");
-    rest.get(url).on('Complete', write2File);
+    rest.get(url).on('complete', write2File);
 }
 
 if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
+        .option('-u, --url <url>', 'url to index.html', clone(getFileFromUrl), URL_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .option('-u, --url <url>', 'url to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
         .parse(process.argv);
-    var checkJson = checkHtmlFile(program.file, program.checks);
+    if (program.url != "") {
+        var checkJson = checkHtmlFile(TEMP_FILE, program.checks);
+    }
+    else {
+        var checkJson = checkHtmlFile(program.file, program.checks);
+    }
     var outJson = JSON.stringify(checkJson, null, 4);
     console.log(outJson);
 } else {
